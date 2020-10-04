@@ -1,4 +1,15 @@
 {
+    "name": "starring-jane/wordpress-fallback",
+    "description": "Load assets from your production environment",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Maxim Vanhove",
+            "email": "maxim@starringjane.com"
+        }
+    ],
+    "minimum-stability": "stable",
     "require": {
         "guzzlehttp/guzzle": "^7.1"
     }
