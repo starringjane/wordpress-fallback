@@ -1,9 +1,9 @@
 <?php
 
 /**
- * WordpressFallbackSettings
+ * Wordpress Local Assets Fallback Plugin
  */
-class WordpressFallbackSettings {
+class WLAFP_Settings {
 
     protected $plugin_file_name;
 
@@ -51,7 +51,7 @@ class WordpressFallbackSettings {
     {
         $settings_url = get_admin_url(null, 'options-general.php?page=wordpress-fallback.php');
 
-        $links[] = '<a href="' . $settings_url . '">' . __('Settings') . '</a>';
+        $links[] = '<a href="' . $settings_url . '">' . __('Settings', 'wlafp') . '</a>';
 
         return $links;
     }
@@ -73,16 +73,28 @@ class WordpressFallbackSettings {
         $this->store();
 
         $settings = $this->get();
+        $errors = $this->validate($settings);
 
         require __DIR__ . '/../templates/settings.php';
     }
 
     public function get()
     {
-        return (object)array_merge([
+        return (object) array_merge([
             'production_host' => '',
             'download' => false,
-        ], (array)get_option($this->options_settings_key, []));
+        ], (array) get_option($this->options_settings_key, []));
+    }
+
+    protected function validate($settings)
+    {
+        $errors = [];
+
+        if (wp_http_validate_url($settings->production_host) === false) {
+            $errors['production_host'] = __('Please enter a valid url', 'wlafp');
+        }
+
+        return $errors;
     }
 
     protected function store()
@@ -91,9 +103,15 @@ class WordpressFallbackSettings {
             return false;
         }
 
-        return update_option($this->options_settings_key, (object)[
-            'production_host' => isset($_POST['production_host']) ? trim((string)$_POST['production_host'], ' /') : '',
-            'download' => isset($_POST['download']) ? (boolean)$_POST['download'] : false,
-        ]);
+        $settings = (object) [
+            'production_host' => $this->get_request_value('production_host', ''),
+            'download' => (bool) $this->get_request_value('production_host', false),
+        ];
+
+        return update_option($this->options_settings_key, $settings);
+    }
+
+    protected function get_request_value($key, $default = null) {
+        return isset($_POST[$key]) ? sanitize_text_field($_POST[$key]) : $default;
     }
 }

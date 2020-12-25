@@ -3,12 +3,12 @@
 /**
  * Require settings
  */
-require_once 'wordpress-fallback-settings.php';
+require_once 'WLAFP_Settings.php';
 
 /**
- * WordpressFallbackPlugin
+ * Wordpress Local Assets Fallback Plugin
  */
-class WordpressFallbackPlugin {
+class WLAFP_Plugin {
 
     public $version = '1.0.0';
 
@@ -21,9 +21,9 @@ class WordpressFallbackPlugin {
     /**
      * Constructor
      */
-    public function __construct($plugin_file_name, WordpressFallbackSettings $settings)
+    public function __construct($plugin_file_name, WLAFP_Settings $settings)
     {
-        define('WORDPRESS_FALLBACK_VERSION', $this->version);
+        define('WLAFP_VERSION', $this->version);
 
         $this->plugin_file_name = $plugin_file_name;
         $this->settings = $settings->get();
@@ -37,7 +37,7 @@ class WordpressFallbackPlugin {
      */
     static function create($plugin_file_name, $settings = null)
     {
-        $settings = $settings ?: WordpressFallbackSettings::create($plugin_file_name);
+        $settings = $settings ?: WLAFP_Settings::create($plugin_file_name);
 
         return new self($plugin_file_name, $settings);
     }
