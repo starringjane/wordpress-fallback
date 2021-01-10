@@ -4,6 +4,7 @@
  * Require settings
  */
 require_once 'WLAFP_Settings.php';
+require_once 'WLAFP_Asset.php';
 
 /**
  * Wordpress Local Assets Fallback Plugin
@@ -47,13 +48,26 @@ class WLAFP_Plugin {
      */
     public function actions()
     {
-        add_action('wp', [$this, 'wpAction']);
+        add_action('init', [$this, 'addRewriteRule']);
+        add_action('wp', [$this, 'fallback']);
     }
 
     /**
-     * On wp action
+     * Add rewrite rule to return 404 for non existing assets
      */
-    public function wpAction()
+    public function addRewriteRule()
+    {
+        $uploads_url = wp_upload_dir()['baseurl'];
+        $uploads_url = str_replace(get_site_url(), '', $uploads_url);
+        $uploads_url = trim($uploads_url, '/');
+
+        add_rewrite_rule($uploads_url . '(.*)', 'index.php?attachment=$matches[1]');
+    }
+
+    /**
+     * Stream fallback asset when necessary
+     */
+    public function fallback()
     {
         /**
          * Ignore if request is not 404
@@ -62,12 +76,10 @@ class WLAFP_Plugin {
             return;
         }
 
-        $headers = apache_request_headers();
-
         /**
          * Ignore html requests
          */
-        if (strpos($headers['Accept'], 'text/html') !== false) {
+        if (strpos(apache_request_headers()['Accept'], 'text/html') !== false) {
             return;
         }
 
@@ -91,10 +103,17 @@ class WLAFP_Plugin {
             return;
         }
 
-        return $this->fetch($fallback, [
-            'Accept' => $headers['Accept'] ?? '',
-            'Accept-Encoding' => $headers['Accept-Encoding'] ?? '',
-        ]);
+        $asset = WLAFP_Asset::create($url, $fallback);
+
+        $asset->download();
+
+        $asset->stream();
+
+        if ($this->settings->download !== true) {
+            $asset->delete();
+        }
+
+        exit;
     }
 
     protected function getUrl()
@@ -105,50 +124,5 @@ class WLAFP_Plugin {
     protected function getHost()
     {
         return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
-    }
-
-    protected function fetch($url, $headers)
-    {
-        try {
-            $response = $this->client->request('GET', $url, [
-                'headers' => $headers,
-            ]);
-        } catch (\Exception $exception) {
-            return;
-        }
-
-        if ($this->settings->download === true && $response->getStatusCode() === 200) {
-            $this->store($url, $response->getBody());
-        }
-
-        http_response_code($response->getStatusCode());
-        header('x-origin: ' . $url);
-
-        foreach ($response->getHeaders() as $name => $values) {
-            header($name . ': ' . implode(', ', $values));
-        }
-
-        echo $response->getBody();
-
-        exit;
-    }
-
-    protected function store($url, $contents)
-    {
-        $path = parse_url($url)['path'];
-
-        $parts = explode('/', $path);
-        $file = array_pop($parts);
-        $dir = realpath(WP_CONTENT_DIR);
-
-        foreach($parts as $part) {
-            $dir .= "$part/";
-
-            if(!is_dir($dir)) {
-                mkdir($dir);
-            }
-        }
-
-        file_put_contents(WP_CONTENT_DIR. $path, (string)$contents);
     }
 }

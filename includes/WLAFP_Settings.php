@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Wordpress Local Assets Fallback Plugin
+ * Wordpress Local Assets Fallback Settings
  */
-class WLAFP_Settings {
-
+class WLAFP_Settings
+{
     protected $plugin_file_name;
 
     protected $options_settings_key = 'wordpress-fallback-settings';
@@ -105,7 +105,7 @@ class WLAFP_Settings {
 
         $settings = (object) [
             'production_host' => $this->get_request_value('production_host', ''),
-            'download' => (bool) $this->get_request_value('production_host', false),
+            'download' => (bool) $this->get_request_value('download', false),
         ];
 
         return update_option($this->options_settings_key, $settings);
