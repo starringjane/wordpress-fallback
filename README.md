@@ -10,9 +10,9 @@ Add the plugin to your plugins folder
 
 ## Usage
 
-Add the production URL to the settings. All unfound assets be fetched from the production environment.
+Add the production URL to the settings. All unfound assets will be fetched from the production environment.
 
-Allow the plugin to download the assets for faster response times
+Allow the plugin to download the assets for faster response times.
 
 ## Contributors
 
