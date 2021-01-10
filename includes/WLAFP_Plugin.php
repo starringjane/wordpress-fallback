@@ -58,10 +58,10 @@ class WLAFP_Plugin {
     public function addRewriteRule()
     {
         $uploads_url = wp_upload_dir()['baseurl'];
-        $uploads_url = str_replace(get_site_url(), '', $uploads_url);
+        $uploads_url = str_replace($this->getHost(), '', $uploads_url);
         $uploads_url = trim($uploads_url, '/');
 
-        add_rewrite_rule($uploads_url . '(.*)', 'index.php?attachment=$matches[1]');
+        add_rewrite_rule($uploads_url . '/(.*)', 'index.php?attachment=$matches[1]');
     }
 
     /**
