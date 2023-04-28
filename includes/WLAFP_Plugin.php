@@ -103,9 +103,16 @@ class WLAFP_Plugin {
             return;
         }
 
+        /**
+         * Ignore if not an upload
+         */
+        if (!$this->urlContainsUploadDir($url)) {
+            return;
+        }
+
         $asset = WLAFP_Asset::create($url, $fallback);
 
-        $asset->download();
+        $download = $asset->download();
 
         $asset->stream();
 
@@ -113,7 +120,25 @@ class WLAFP_Plugin {
             $asset->delete();
         }
 
-        exit;
+        if ($download) {
+            exit;
+        }
+    }
+
+    protected function urlContainsUploadDir($url)
+    {
+        $uploads_url = $this->getUrlWithoutProtocol(wp_upload_dir()['baseurl']);
+        $url = $this->getUrlWithoutProtocol($url);
+
+        return strpos($url, $uploads_url) !== false;
+    }
+
+    protected function getUrlWithoutProtocol($url)
+    {
+        $url = str_replace('http://', '', $url);
+        $url = str_replace('https://', '', $url);
+
+        return $url;
     }
 
     protected function getUrl()

@@ -35,11 +35,11 @@ class WLAFP_Asset
             return false;
         }
 
-        // echo '<pre>';var_dump($path);die;
-
         if ($this->local_path) {
             file_put_contents($this->local_path, $response->getBody());
         }
+
+        return true;
     }
 
     public function stream()
