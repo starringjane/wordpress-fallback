@@ -11,7 +11,7 @@
  * Plugin Name:       Fallback
  * Plugin URI:        https://github.com/starringjane/wordpress-fallback
  * Description:       Load assets from your production environment
- * Version:           1.0.2
+ * Version:           1.0.3
  * Author:            Starring Jane
  * Author URI:        https://github.com/starringjane
  * License:           GPL-2.0+
